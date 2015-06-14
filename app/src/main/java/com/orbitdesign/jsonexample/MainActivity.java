@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,10 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,13 +37,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setUpRecyclerView();
+
+        // Use this to simply load the JSON from the saved text file.
+        //loadListFromFile();
+
+    }
+
+    private void setUpRecyclerView() {
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         definitionAdapter = new DefinitionAdapter();
 
         recyclerView.setAdapter(definitionAdapter);
+    }
 
+    private void updateRecyclerAdapter(List<Definition> definitionList){
+        definitionAdapter.swapDefinitions(definitionList);
+    }
+
+    private void loadListFromFile() {
         JSONObject myJsonObject = testJsonFromFile();
 
         List<Definition> definitionList = new ArrayList<>();
@@ -72,9 +83,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        definitionAdapter.swapDefinitions(definitionList);
-
+        updateRecyclerAdapter(definitionList);
     }
+
 
     private JSONObject testJsonFromFile(){
 
