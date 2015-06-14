@@ -1,5 +1,6 @@
 package com.orbitdesign.jsonexample;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -7,6 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.orbitdesign.jsonexample.adapters.DefinitionAdapter;
 import com.orbitdesign.jsonexample.models.Definition;
@@ -18,7 +24,10 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String JSON_EXAMPLE = " {\"firstName\":\"John\",\"lastName\":\"Smith\",\"age\":15}";
 
+    private EditText editText;
+    private Button button;
+    private ProgressBar progressBar;
+
     private RecyclerView recyclerView;
     private DefinitionAdapter definitionAdapter;
 
@@ -37,11 +50,55 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setUpRecyclerView();
+        setUpGui();
+
 
         // Use this to simply load the JSON from the saved text file.
         //loadListFromFile();
 
+    }
+
+    private void setUpGui() {
+        setUpRecyclerView();
+        editText = (EditText)findViewById(R.id.editText);
+        button = (Button)findViewById(R.id.button);
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+
+    }
+
+    public void onClickButton(View view) {
+
+        new AsyncDefinitionsDownloader(new AsyncDefinitionsDownloader.LoadingCallbacks() {
+            @Override
+            public void onLoad() {
+                setLoading(true);
+            }
+
+            @Override
+            public void onFinishLoading(List<Definition> definitionList) {
+                setLoading(false);
+
+                if(!definitionList.isEmpty()){
+                    updateRecyclerAdapter(definitionList);
+                }else {
+                    Toast.makeText(MainActivity.this, "No definition found", Toast.LENGTH_SHORT).show();
+                }
+
+
+
+            }
+        }).execute(editText.getText().toString());
+
+    }
+
+    public void setLoading(boolean isLoading){
+        if(isLoading){
+            recyclerView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
+        }else{
+            recyclerView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     private void setUpRecyclerView() {
@@ -175,4 +232,102 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+    protected static class AsyncDefinitionsDownloader extends AsyncTask<String, Void, List<Definition>>{
+
+        private LoadingCallbacks myLoadingCallbacks;
+
+        public AsyncDefinitionsDownloader(LoadingCallbacks callback){
+            myLoadingCallbacks = callback;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Set loading to true
+            myLoadingCallbacks.onLoad();
+        }
+
+        @Override
+        protected List<Definition> doInBackground(String... params) {
+            List<Definition> list = new ArrayList<>();
+
+            try {
+                URL url = new URL("https://montanaflynn-dictionary.p.mashape.com/define?word="+params[0]);
+
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.setRequestProperty("X-Mashape-Key", "lrt4vMehhtmshQgInD3agn7RsZQjp1LgvV5jsnOQ26eRmkUXkj");
+                        connection.setRequestProperty("Accept", "application/json");
+
+                Log.d(TAG, "Ready to request data");
+
+                String apiString = readStream(connection.getInputStream());
+                Log.d(TAG, "API returned "+apiString);
+
+                JSONObject myJsonObject = new JSONObject(apiString);
+
+
+                JSONArray myArray = myJsonObject.getJSONArray("definitions");
+                JSONObject item;
+                for (int i = 0 ; i <myArray.length(); i++){
+
+
+                    item = myArray.getJSONObject(i);
+
+
+                    list.add(new Definition(item.getString("text"), item.getString("attribution")) );
+                }
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error: "+e.getMessage());
+            }
+
+
+            return list;
+        }
+
+
+        private String readStream(InputStream in) {
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new InputStreamReader(in));
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return stringBuilder.toString();
+        }
+            @Override
+        protected void onPostExecute(List<Definition> definitionList) {
+            super.onPostExecute(definitionList);
+
+            // Update the adapter
+            // Set loading to false
+            myLoadingCallbacks.onFinishLoading(definitionList);
+        }
+
+
+        public interface LoadingCallbacks{
+            public void onLoad();
+            public void onFinishLoading(List<Definition> definitionList);
+        }
+
+    }
+
+
 }
