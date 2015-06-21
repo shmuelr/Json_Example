@@ -19,6 +19,9 @@ import com.orbitdesign.jsonexample.adapters.DefinitionAdapter;
 import com.orbitdesign.jsonexample.models.Definition;
 import com.orbitdesign.jsonexample.models.ServerResponse;
 import com.orbitdesign.jsonexample.models.Student;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -260,14 +263,24 @@ public class MainActivity extends AppCompatActivity {
             try {
                 URL url = new URL("https://montanaflynn-dictionary.p.mashape.com/define?word="+params[0]);
 
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                /*HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         connection.setRequestProperty("X-Mashape-Key", "lrt4vMehhtmshQgInD3agn7RsZQjp1LgvV5jsnOQ26eRmkUXkj");
                         connection.setRequestProperty("Accept", "application/json");
+*/
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("X-Mashape-Key", "lrt4vMehhtmshQgInD3agn7RsZQjp1LgvV5jsnOQ26eRmkUXkj")
+                        .addHeader("Accept",  "application/json")
+                        .build();
+                Response okhttpResponse =
+                client.newCall(request).execute();
 
                 Log.d(TAG, "Ready to request data");
 
                 ObjectMapper objectMapper = new ObjectMapper();
-                response = objectMapper.readValue(connection.getInputStream(), ServerResponse.class);
+                response = objectMapper.readValue(okhttpResponse.body().byteStream(), ServerResponse.class);
 
                 /*String apiString = readStream(connection.getInputStream());
                 //Log.d(TAG, "API returned "+apiString);
