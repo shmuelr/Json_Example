@@ -1,10 +1,12 @@
 package com.orbitdesign.jsonexample.models;
 
 /**
- * Created by sdros_000 on 6/14/2015.
+ * Created by shmuel on 6/21/15.
  */
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -15,58 +17,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-
 @JsonPropertyOrder({
-        "text",
-        "attribution"
+        "definitions"
 })
-public class Definition {
+public class ServerResponse {
 
-    @JsonProperty("text")
-    private String text;
-    @JsonProperty("attribution")
-    private String attribution;
+    @JsonProperty("definitions")
+    private List<Definition> definitions = new ArrayList<Definition>();
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
      *
      * @return
-     * The text
+     * The definitions
      */
-    @JsonProperty("text")
-    public String getText() {
-        return text;
+    @JsonProperty("definitions")
+    public List<Definition> getDefinitions() {
+        return definitions;
     }
 
     /**
      *
-     * @param text
-     * The text
+     * @param definitions
+     * The definitions
      */
-    @JsonProperty("text")
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    /**
-     *
-     * @return
-     * The attribution
-     */
-    @JsonProperty("attribution")
-    public String getAttribution() {
-        return attribution;
-    }
-
-    /**
-     *
-     * @param attribution
-     * The attribution
-     */
-    @JsonProperty("attribution")
-    public void setAttribution(String attribution) {
-        this.attribution = attribution;
+    @JsonProperty("definitions")
+    public void setDefinitions(List<Definition> definitions) {
+        this.definitions = definitions;
     }
 
     @JsonAnyGetter

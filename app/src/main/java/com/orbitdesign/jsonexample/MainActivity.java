@@ -14,8 +14,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orbitdesign.jsonexample.adapters.DefinitionAdapter;
 import com.orbitdesign.jsonexample.models.Definition;
+import com.orbitdesign.jsonexample.models.ServerResponse;
 import com.orbitdesign.jsonexample.models.Student;
 
 import org.json.JSONArray;
@@ -128,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 item = myArray.getJSONObject(i);
 
 
-                definitionList.add(new Definition(item.getString("text"), item.getString("attribution")) );
+                //definitionList.add(new Definition(item.getString("text"), item.getString("attribution")) );
             }
 
             for (Definition definition :definitionList){
@@ -253,8 +255,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected List<Definition> doInBackground(String... params) {
-            List<Definition> list = new ArrayList<>();
-
+            //List<Definition> list = new ArrayList<>();
+            ServerResponse response = null;
             try {
                 URL url = new URL("https://montanaflynn-dictionary.p.mashape.com/define?word="+params[0]);
 
@@ -264,8 +266,12 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d(TAG, "Ready to request data");
 
-                String apiString = readStream(connection.getInputStream());
-                Log.d(TAG, "API returned "+apiString);
+                ObjectMapper objectMapper = new ObjectMapper();
+                response = objectMapper.readValue(connection.getInputStream(), ServerResponse.class);
+
+                /*String apiString = readStream(connection.getInputStream());
+                //Log.d(TAG, "API returned "+apiString);
+
 
                 JSONObject myJsonObject = new JSONObject(apiString);
 
@@ -279,14 +285,14 @@ public class MainActivity extends AppCompatActivity {
 
 
                     list.add(new Definition(item.getString("text"), item.getString("attribution")) );
-                }
+                }*/
 
             } catch (Exception e) {
                 Log.e(TAG, "Error: "+e.getMessage());
             }
 
 
-            return list;
+            return response.getDefinitions();
         }
 
 
