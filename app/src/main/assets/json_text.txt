@@ -1,4 +1,7 @@
 {
+
+  "responseCode": 200,
+
   "definitions": [
     {
       "text": "The use of words to express something different from and often opposite to their literal meaning.",
@@ -13,7 +16,7 @@
       "attribution": "from The American Heritage Dictionary of the English Language, 4th Edition"
     },
     {
-      "text": "Incongruity between what might be expected and what actually occurs: \"Hyde noted the irony of Ireland's copying the nation she most hated”  ( Richard Kain). ",
+      "text": "Incongruity between what might be expected and what actually occurs: \"Hyde noted the irony of Ireland's copying the nation she most hatedï¿½  ( Richard Kain). ",
       "attribution": "from The American Heritage Dictionary of the English Language, 4th Edition"
     },
     {

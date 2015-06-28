@@ -125,15 +125,20 @@ public class MainActivity extends AppCompatActivity {
         List<Definition> definitionList = new ArrayList<>();
 
         try {
+            if(myJsonObject.getInt("reponseCode") != 200){
+                return;
+            }
             JSONArray myArray = myJsonObject.getJSONArray("definitions");
             JSONObject item;
-            for (int i = 0 ; i <myArray.length(); i++){
-
+            for (int i = 0 ; i < myArray.length(); i++){
 
                 item = myArray.getJSONObject(i);
 
+                Definition definition = new Definition();
+                definition.setText(item.getString("text"));
+                definition.setAttribution(item.getString("attribution"));
 
-                //definitionList.add(new Definition(item.getString("text"), item.getString("attribution")) );
+                definitionList.add(definition);
             }
 
             for (Definition definition :definitionList){
@@ -272,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 Request request = new Request.Builder()
                         .url(url)
                         .addHeader("X-Mashape-Key", "lrt4vMehhtmshQgInD3agn7RsZQjp1LgvV5jsnOQ26eRmkUXkj")
-                        .addHeader("Accept",  "application/json")
+                        .addHeader("Accept", "application/json")
                         .build();
                 Response okhttpResponse =
                 client.newCall(request).execute();
@@ -281,6 +286,9 @@ public class MainActivity extends AppCompatActivity {
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 response = objectMapper.readValue(okhttpResponse.body().byteStream(), ServerResponse.class);
+
+                Log.d(TAG, "String from objectMapper = " + objectMapper.writeValueAsString(response));
+
 
                 /*String apiString = readStream(connection.getInputStream());
                 //Log.d(TAG, "API returned "+apiString);
